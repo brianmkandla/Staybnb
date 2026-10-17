@@ -1,0 +1,26 @@
+﻿# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build output
+**/bin/
+**/obj/
+
+# IDE and local configuration
+.idea/
+appsettings.Development.json
+secrets.json
+
+# Local databases and backups
+*.mdf
+*.ldf
+*.db
+*.sqlite
+*.sqlite3
+*.bak
+
+# Publish output
+publish/
