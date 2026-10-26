@@ -1,0 +1,125 @@
+
+@model IEnumerable<Staybnb.Models.HostProperty>
+
+@{
+    ViewData["Title"] = "Manage My Properties";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>My Properties</h1>
+            <p class="text-muted">
+                Manage your listings and control whether guests can see them.
+            </p>
+        </div>
+
+        <a asp-controller="HostApplication"
+           asp-action="Create"
+           class="btn btn-primary">
+            Apply to List a Property
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success" role="alert">
+            @successMessage
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            You don't have any properties yet.
+            Once your property application is approved, your listings
+            will appear here.
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var property in Model)
+            {
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="card h-100 shadow-sm">
+                        @if (property.Images.Any())
+                        {
+                            <img src="@property.Images.First().ImageUrl"
+                                 class="card-img-top"
+                                 alt="@property.Title"
+                                 style="height: 220px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div class="bg-light d-flex align-items-center justify-content-center"
+                                 style="height: 220px;">
+                                <span class="text-muted">No image available</span>
+                            </div>
+                        }
+
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                <h5 class="card-title">@property.Title</h5>
+
+                                @if (property.IsActive)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Inactive</span>
+                                }
+                            </div>
+
+                            <p class="text-muted mb-2">
+                                @property.City · @property.PropertyType
+                            </p>
+
+                            <p class="card-text">
+                                @(property.Description.Length > 120
+                                    ? property.Description[..120] + "..."
+                                    : property.Description)
+                            </p>
+
+                            <p class="fw-bold">
+                                @property.PricePerNight.ToString("C")
+                                <span class="text-muted fw-normal">per night</span>
+                            </p>
+
+                            <p class="small text-muted">
+                                @property.Address
+                            </p>
+                        </div>
+
+                        <div class="card-footer bg-white">
+                            <form asp-controller="HostProperties"
+                                  asp-action="ToggleActive"
+                                  method="post">
+                                <input type="hidden"
+                                       name="id"
+                                       value="@property.Id" />
+
+                                @if (property.IsActive)
+                                {
+                                    <button type="submit"
+                                            class="btn btn-outline-danger w-100">
+                                        Deactivate Listing
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="submit"
+                                            class="btn btn-outline-success w-100">
+                                        Activate Listing
+                                    </button>
+                                }
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+gging

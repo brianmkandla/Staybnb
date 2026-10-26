@@ -1,5 +1,3 @@
-
-
 namespace Staybnb.Enums
 {
     public enum ApplicationStatus

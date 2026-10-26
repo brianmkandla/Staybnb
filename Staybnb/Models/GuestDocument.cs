@@ -1,3 +1,4 @@
+
 using System.ComponentModel.DataAnnotations;
 using Staybnb.Enums;
 
@@ -19,6 +20,10 @@ namespace Staybnb.Models
         [StringLength(200)]
         public required string FileName { get; set; }
 
-        public DocumentStatus Status { get; set; } = DocumentStatus.Pending;
+        public DocumentStatus Status { get; set; } =
+            DocumentStatus.Pending;
+
+        [StringLength(500)]
+        public string? RejectionReason { get; set; }
     }
 }

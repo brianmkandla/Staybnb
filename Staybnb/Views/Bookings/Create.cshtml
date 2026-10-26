@@ -1,0 +1,97 @@
+
+@model Staybnb.Models.Booking
+
+@{
+    ViewData["Title"] = "Book Property";
+    var property = ViewBag.Property as Staybnb.Models.HostProperty;
+}
+
+<div class="container mt-4" style="max-width: 750px;">
+    <a asp-controller="Properties"
+       asp-action="Details"
+       asp-route-id="@Model.PropertyId"
+       class="btn btn-outline-secondary mb-3">
+        &larr; Back to Property
+    </a>
+
+    <h1>Request a Booking</h1>
+
+    @if (property != null)
+    {
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4>@property.Title</h4>
+                <p class="text-muted mb-2">
+                    @property.City
+                </p>
+                <p>
+                    <strong>Nightly price:</strong>
+                    R @property.PricePerNight.ToString("N2")
+                </p>
+                <p class="mb-0">
+                    <strong>Additional fees:</strong>
+                    R @((property.CleaningFee + property.ServiceFee).ToString("N2"))
+                </p>
+            </div>
+        </div>
+    }
+
+    <div asp-validation-summary="All"
+         class="text-danger mb-3"></div>
+
+    <form asp-controller="Bookings"
+          asp-action="Create"
+          asp-route-propertyId="@Model.PropertyId"
+          method="post">
+
+        <input type="hidden"
+               name="propertyId"
+               value="@Model.PropertyId" />
+
+        <div class="mb-3">
+            <label for="checkInDate" class="form-label">
+                Check-in date
+            </label>
+            <input type="date"
+                   id="checkInDate"
+                   name="checkInDate"
+                   class="form-control"
+                   value="@Model.CheckInDate.ToString("yyyy-MM-dd")"
+                   required />
+        </div>
+
+        <div class="mb-3">
+            <label for="checkOutDate" class="form-label">
+                Check-out date
+            </label>
+            <input type="date"
+                   id="checkOutDate"
+                   name="checkOutDate"
+                   class="form-control"
+                   value="@Model.CheckOutDate.ToString("yyyy-MM-dd")"
+                   required />
+        </div>
+
+        <div class="mb-3">
+            <label for="numberOfTravelers" class="form-label">
+                Number of travellers
+            </label>
+            <input type="number"
+                   id="numberOfTravelers"
+                   name="numberOfTravelers"
+                   class="form-control"
+                   min="1"
+                   max="20"
+                   value="@Model.NumberOfTravelers"
+                   required />
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">
+            Submit Booking Request
+        </button>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

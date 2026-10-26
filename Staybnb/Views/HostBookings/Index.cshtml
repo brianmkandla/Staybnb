@@ -1,0 +1,104 @@
+
+@model IEnumerable<Staybnb.Models.Booking>
+
+@{
+    ViewData["Title"] = "Manage Bookings";
+}
+
+<h1>Manage Bookings</h1>
+
+<p>Review booking requests for your properties.</p>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        You don't have any booking requests yet.
+    </div>
+}
+else
+{
+    foreach (var booking in Model)
+    {
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4>
+                    @(booking.Property?.Title ?? "Property unavailable")
+                </h4>
+
+                <p>
+                    <strong>Guest:</strong>
+                    @(booking.Guest?.FirstName ?? "Unknown")
+                    @(booking.Guest?.LastName ?? "")
+                </p>
+
+                <p>
+                    <strong>Check-in:</strong>
+                    @booking.CheckInDate.ToString("dd MMM yyyy")
+                </p>
+
+                <p>
+                    <strong>Check-out:</strong>
+                    @booking.CheckOutDate.ToString("dd MMM yyyy")
+                </p>
+
+                <p>
+                    <strong>Travellers:</strong>
+                    @booking.NumberOfTravelers
+                </p>
+
+                <p>
+                    <strong>Total price:</strong>
+                    @booking.TotalPrice.ToString("C")
+                </p>
+
+                <p>
+                    <strong>Status:</strong>
+                    @booking.Status
+                </p>
+
+                @if (booking.Status == Staybnb.Enums.BookingStatus.Pending)
+                {
+                    <div class="d-flex gap-2">
+                        <form asp-action="Approve"
+                              method="post">
+                            <input type="hidden"
+                                   name="id"
+                                   value="@booking.Id" />
+
+                            <button type="submit"
+                                    class="btn btn-success">
+                                Approve
+                            </button>
+                        </form>
+
+                        <form asp-action="Reject"
+                              method="post">
+                            <input type="hidden"
+                                   name="id"
+                                   value="@booking.Id" />
+
+                            <button type="submit"
+                                    class="btn btn-danger">
+                                Reject
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+}

@@ -1,0 +1,166 @@
+
+@model IEnumerable<Staybnb.Models.HostApplication>
+
+@{
+    ViewData["Title"] = "Host Applications";
+}
+
+<div class="container mt-4">
+    <h1>Host Applications</h1>
+    <p class="text-muted">
+        Review property submissions and decide whether applicants
+        can become hosts.
+    </p>
+
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success" role="alert">
+            @successMessage
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="alert alert-danger" role="alert">
+            @errorMessage
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            No host applications have been submitted yet.
+        </div>
+    }
+    else
+    {
+        foreach (var application in Model)
+        {
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header d-flex justify-content-between
+                            align-items-center flex-wrap gap-2">
+                    <strong>
+                        Application #@application.Id
+                    </strong>
+
+                    <span class="badge
+                        @(application.Status ==
+                          Staybnb.Enums.ApplicationStatus.Pending
+                            ? "bg-warning text-dark"
+                            : application.Status ==
+                              Staybnb.Enums.ApplicationStatus.Approved
+                                ? "bg-success"
+                                : "bg-danger")">
+                        @application.Status
+                    </span>
+                </div>
+
+                <div class="card-body">
+                    <h4>@application.Property.Title</h4>
+
+                    <p>
+                        <strong>Applicant:</strong>
+                        @application.Applicant.FirstName
+                        @application.Applicant.LastName
+                    </p>
+
+                    <p>
+                        <strong>Email:</strong>
+                        @application.Applicant.Email
+                    </p>
+
+                    <p>
+                        <strong>Applied:</strong>
+                        @application.AppliedAt.ToLocalTime()
+                            .ToString("dd MMM yyyy, HH:mm")
+                    </p>
+
+                    <hr />
+
+                    <p>
+                        <strong>Description:</strong><br />
+                        @application.Property.Description
+                    </p>
+
+                    <p>
+                        <strong>Address:</strong>
+                        @application.Property.Address,
+                        @application.Property.City
+                    </p>
+
+                    <p>
+                        <strong>Property type:</strong>
+                        @application.Property.PropertyType
+                    </p>
+
+                    <p>
+                        <strong>Price per night:</strong>
+                        R @application.Property.PricePerNight.ToString("N2")
+                    </p>
+
+                    <p>
+                        <strong>Cleaning fee:</strong>
+                        R @application.Property.CleaningFee.ToString("N2")
+                    </p>
+
+                    <p>
+                        <strong>Service fee:</strong>
+                        R @application.Property.ServiceFee.ToString("N2")
+                    </p>
+
+                    @if (application.Property.Images.Any())
+                    {
+                        <h5 class="mt-3">Property images</h5>
+
+                        <div class="d-flex flex-wrap gap-3">
+                            @foreach (var image in application.Property.Images)
+                            {
+                                <img src="@image.ImageUrl"
+                                     alt="Property image"
+                                     class="img-thumbnail"
+                                     style="width: 180px; height: 130px;
+                                            object-fit: cover;" />
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">
+                            No images are attached to this property.
+                        </p>
+                    }
+
+                    @if (application.Status ==
+                         Staybnb.Enums.ApplicationStatus.Pending)
+                    {
+                        <hr />
+
+                        <div class="d-flex flex-wrap gap-2">
+                            <form asp-controller="AdminHostApplications"
+                                  asp-action="Approve"
+                                  asp-route-id="@application.Id"
+                                  method="post">
+                                <button type="submit"
+                                        class="btn btn-success">
+                                    Approve Application
+                                </button>
+                            </form>
+
+                            <form asp-controller="AdminHostApplications"
+                                  asp-action="Reject"
+                                  asp-route-id="@application.Id"
+                                  method="post">
+                                <button type="submit"
+                                        class="btn btn-danger"
+                                        onclick="return confirm(
+                                            'Are you sure you want to reject this application?');">
+                                    Reject Application
+                                </button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>

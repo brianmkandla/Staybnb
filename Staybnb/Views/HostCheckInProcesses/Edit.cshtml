@@ -1,0 +1,74 @@
+
+@{
+    ViewData["Title"] = "Configure Check-in";
+    var property = ViewBag.Property as Staybnb.Models.HostProperty;
+}
+
+<div class="container py-4">
+    <h1>Configure Check-in</h1>
+
+    @if (property != null)
+    {
+        <p class="text-muted">Property: @property.Title</p>
+    }
+
+    <form asp-action="Edit" method="post">
+        <input type="hidden"
+               name="propertyId"
+               value="@property?.Id" />
+
+        <div asp-validation-summary="All"
+             class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+            <label for="title" class="form-label">
+                Check-in process title
+            </label>
+            <input id="title"
+                   name="title"
+                   class="form-control"
+                   maxlength="200"
+                   required
+                   value="@ViewBag.TitleValue" />
+        </div>
+
+        <div class="mb-3">
+            <label for="steps" class="form-label">
+                Check-in instructions
+            </label>
+            <textarea id="steps"
+                      name="steps"
+                      class="form-control"
+                      rows="6"
+                      required
+                      placeholder="One instruction per line">@ViewBag.StepsValue</textarea>
+            <div class="form-text">
+                Example: Contact the host on arrival, collect the keys,
+                and use the access code provided.
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="requiredDocuments" class="form-label">
+                Required documents
+            </label>
+            <textarea id="requiredDocuments"
+                      name="requiredDocuments"
+                      class="form-control"
+                      rows="3"
+                      required
+                      placeholder="One document per line"></textarea>
+            <div class="form-text">
+                Example: South African ID or passport.
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Save Check-in Instructions
+        </button>
+
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            Cancel
+        </a>
+    </form>
+</div>

@@ -1,0 +1,167 @@
+@using Staybnb.Enums
+@model IEnumerable<Staybnb.Models.GuestDocument>
+
+@{
+    ViewData["Title"] = "Review Guest Documents";
+}
+
+<div class="container mt-4 mb-5">
+    <h1>Review Guest Documents</h1>
+
+    <p class="text-muted">
+        Review documents submitted by guests who have bookings
+        at your properties.
+    </p>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success" role="alert">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            No guest documents have been submitted for your properties yet.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered align-middle">
+                <thead>
+                    <tr>
+                        <th>Guest</th>
+                        <th>Property</th>
+                        <th>Booking Dates</th>
+                        <th>Document</th>
+                        <th>Status and Reason</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var document in Model)
+                    {
+                        var booking = document.GuestCheckIn.Booking;
+
+                        <tr>
+                            <td>
+                                @(booking.Guest.Email ?? "Guest")
+                            </td>
+
+                            <td>@booking.Property.Title</td>
+
+                            <td>
+                                @booking.CheckInDate.ToString("dd MMM yyyy")
+                                –
+                                @booking.CheckOutDate.ToString("dd MMM yyyy")
+                            </td>
+
+                            <td>
+                                <strong>@document.DocumentType</strong>
+                                <br />
+
+                                <a asp-action="Download"
+                                   asp-route-id="@document.Id">
+                                    Download document
+                                </a>
+                            </td>
+
+                            <td>
+                                @if (document.Status == DocumentStatus.Pending)
+                                {
+                                    <span class="badge bg-warning text-dark">
+                                        Pending
+                                    </span>
+                                }
+                                else if (document.Status == DocumentStatus.Approved)
+                                {
+                                    <span class="badge bg-success">
+                                        Approved
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">
+                                        Rejected
+                                    </span>
+
+                                    @if (!string.IsNullOrWhiteSpace(document.RejectionReason))
+                                    {
+                                        <p class="small mt-2 mb-0">
+                                            <strong>Reason:</strong>
+                                            @document.RejectionReason
+                                        </p>
+                                    }
+                                }
+                            </td>
+
+                            <td>
+                                @if (document.Status == DocumentStatus.Pending)
+                                {
+                                    <div class="d-flex flex-column gap-3">
+                                        <form asp-action="Approve"
+                                              method="post">
+                                            @Html.AntiForgeryToken()
+
+                                            <input type="hidden"
+                                                   name="id"
+                                                   value="@document.Id" />
+
+                                            <button type="submit"
+                                                    class="btn btn-success btn-sm">
+                                                Approve
+                                            </button>
+                                        </form>
+
+                                        <form asp-action="Reject"
+                                              method="post">
+                                            @Html.AntiForgeryToken()
+
+                                            <input type="hidden"
+                                                   name="id"
+                                                   value="@document.Id" />
+
+                                            <div class="mb-2">
+                                                <label for="reason-@document.Id"
+                                                       class="form-label small">
+                                                    Reason for rejection
+                                                </label>
+
+                                                <textarea id="reason-@document.Id"
+                                                          name="rejectionReason"
+                                                          class="form-control form-control-sm"
+                                                          rows="3"
+                                                          maxlength="500"
+                                                          placeholder="Explain what the guest needs to correct..."
+                                                          required></textarea>
+                                            </div>
+
+                                            <button type="submit"
+                                                    class="btn btn-danger btn-sm">
+                                                Reject Document
+                                            </button>
+                                        </form>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Reviewed</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

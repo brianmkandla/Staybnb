@@ -1,0 +1,273 @@
+@using Staybnb.Models
+@using Staybnb.Enums
+@model GuestCheckIn
+
+@{
+    ViewData["Title"] = "Guest Check-in";
+
+    var instructions = ViewBag.Instructions as List<string>
+        ?? new List<string>();
+
+    var documents = ViewBag.Documents as List<GuestDocument>
+        ?? new List<GuestDocument>();
+}
+
+<div class="container mt-4 mb-5">
+    <h1>Guest Check-in</h1>
+
+    <p class="text-muted">
+        Complete the check-in requirements for
+        <strong>@Model.Booking.Property.Title</strong>.
+    </p>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success" role="alert">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Booking Details</h2>
+        </div>
+
+        <div class="card-body">
+            <p>
+                <strong>Property:</strong>
+                @Model.Booking.Property.Title
+            </p>
+
+            <p>
+                <strong>Check-in:</strong>
+                @Model.Booking.CheckInDate.ToString("dd MMM yyyy")
+            </p>
+
+            <p>
+                <strong>Check-out:</strong>
+                @Model.Booking.CheckOutDate.ToString("dd MMM yyyy")
+            </p>
+
+            <p class="mb-0">
+                <strong>Check-in status:</strong>
+                @Model.Status
+            </p>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Check-in Instructions</h2>
+        </div>
+
+        <div class="card-body">
+            @if (instructions.Any())
+            {
+                <div class="check-in-instructions">
+                    @foreach (var instruction in instructions)
+                    {
+                        var text = instruction.Trim();
+
+                        @if (text.Equals(
+                            "CHECK-IN INSTRUCTIONS",
+                            StringComparison.OrdinalIgnoreCase))
+                        {
+                            <h3 class="h6 fw-bold mt-2 mb-3">
+                                @text
+                            </h3>
+                        }
+                        else if (text.Equals(
+                            "REQUIRED DOCUMENTS",
+                            StringComparison.OrdinalIgnoreCase))
+                        {
+                            <h3 class="h6 fw-bold mt-4 mb-3">
+                                @text
+                            </h3>
+                        }
+                        else
+                        {
+                            <p class="mb-3">@text</p>
+                        }
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mb-0">
+                    No check-in instructions are currently available.
+                    Please contact your host for assistance.
+                </p>
+            }
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Upload a Document</h2>
+        </div>
+
+        <div class="card-body">
+            <p>
+                Upload the documents requested for your stay.
+                Your host will review each submission.
+            </p>
+
+            <form asp-controller="GuestCheckIns"
+                  asp-action="UploadDocument"
+                  method="post"
+                  enctype="multipart/form-data">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       name="checkInId"
+                       value="@Model.Id" />
+
+                <div class="mb-3">
+                    <label for="documentType" class="form-label">
+                        Document Type
+                    </label>
+
+                    <input type="text"
+                           id="documentType"
+                           name="documentType"
+                           class="form-control"
+                           maxlength="100"
+                           placeholder="e.g. Identity"
+                           required />
+                </div>
+
+                <div class="mb-3">
+                    <label for="file" class="form-label">
+                        Select Document
+                    </label>
+
+                    <input type="file"
+                           id="file"
+                           name="file"
+                           class="form-control"
+                           accept=".pdf,.jpg,.jpeg,.png"
+                           required />
+
+                    <div class="form-text">
+                        Accepted formats: PDF, JPG, JPEG and PNG.
+                        Maximum file size: 5 MB.
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Upload Document
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Your Submitted Documents</h2>
+        </div>
+
+        <div class="card-body">
+            @if (!documents.Any())
+            {
+                <p class="text-muted mb-0">
+                    You have not uploaded any documents yet.
+                </p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>Document</th>
+                                <th>Status</th>
+                                <th>Download</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var document in documents)
+                            {
+                                <tr>
+                                    <td>@document.DocumentType</td>
+
+                                    <td>
+                                        @if (document.Status == DocumentStatus.Pending)
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                Pending Review
+                                            </span>
+
+                                            <div class="small text-muted mt-1">
+                                                Your document is waiting for
+                                                your host to review it.
+                                            </div>
+                                        }
+                                        else if (document.Status == DocumentStatus.Approved)
+                                        {
+                                            <span class="badge bg-success">
+                                                Approved
+                                            </span>
+
+                                            <div class="small text-success mt-1">
+                                                Your document has been approved.
+                                            </div>
+                                        }
+                                        else if (document.Status == DocumentStatus.Rejected)
+                                        {
+                                            <span class="badge bg-danger">
+                                                Rejected
+                                            </span>
+
+                                            @if (!string.IsNullOrWhiteSpace(document.RejectionReason))
+                                            {
+                                                <div class="small text-danger mt-1">
+                                                    <strong>Host's feedback:</strong>
+                                                    @document.RejectionReason
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="small text-danger mt-1">
+                                                    Your document was rejected.
+                                                    Please contact your host for
+                                                    guidance before submitting
+                                                    a replacement.
+                                                </div>
+                                            }
+                                        }
+                                    </td>
+
+                                    <td>
+                                        <a asp-controller="GuestCheckIns"
+                                           asp-action="DownloadDocument"
+                                           asp-route-id="@document.Id"
+                                           class="btn btn-outline-primary btn-sm">
+                                            Download
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-controller="GuestCheckIns"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            Back to Guest Check-in
+        </a>
+    </div>
+</div>

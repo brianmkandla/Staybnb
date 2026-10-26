@@ -24,3 +24,6 @@ secrets.json
 
 # Publish output
 publish/
+
+# Private guest identity documents
+**/App_Data/GuestDocuments/

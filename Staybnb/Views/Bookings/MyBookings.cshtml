@@ -1,0 +1,110 @@
+@model IEnumerable<Staybnb.Models.Booking>
+
+@{
+    ViewData["Title"] = "My Bookings";
+}
+
+<h1>My Bookings</h1>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        You haven't made any bookings yet.
+        Browse our available properties to find your next stay.
+    </div>
+
+    <a asp-controller="Properties"
+       asp-action="Index"
+       class="btn btn-primary">
+        Browse Properties
+    </a>
+}
+else
+{
+    foreach (var booking in Model)
+    {
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4>
+                    @(booking.Property?.Title ?? "Property unavailable")
+                </h4>
+
+                <p>
+                    <strong>Location:</strong>
+                    @(booking.Property?.City ?? "Unknown")
+                </p>
+
+                @if (booking.Property?.Images?.Any() == true)
+                {
+                    <img src="@booking.Property.Images.First().ImageUrl"
+                         alt="@booking.Property.Title"
+                         class="img-fluid rounded mb-3"
+                         style="max-width: 300px;" />
+                }
+
+                <p>
+                    <strong>Check-in:</strong>
+                    @booking.CheckInDate.ToString("dd MMM yyyy")
+                </p>
+
+                <p>
+                    <strong>Check-out:</strong>
+                    @booking.CheckOutDate.ToString("dd MMM yyyy")
+                </p>
+
+                <p>
+                    <strong>Travellers:</strong>
+                    @booking.NumberOfTravelers
+                </p>
+
+                <p>
+                    <strong>Total:</strong>
+                    @booking.TotalPrice.ToString("C")
+                </p>
+
+                <p>
+                    <strong>Status:</strong>
+                    @booking.Status
+                </p>
+
+                @if (booking.Status ==
+                    Staybnb.Enums.BookingStatus.Pending)
+                {
+                    <form asp-controller="Bookings"
+                          asp-action="Cancel"
+                          method="post">
+                        <input type="hidden"
+                               name="id"
+                               value="@booking.Id" />
+
+                        <button type="submit"
+                                class="btn btn-outline-danger"
+                                onclick="return confirm('Are you sure you want to cancel this booking request?');">
+                            Cancel Request
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    }
+}
+
+<a asp-controller="Properties"
+   asp-action="Index"
+   class="btn btn-outline-primary">
+    Browse More Properties
+</a>

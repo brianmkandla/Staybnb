@@ -1,0 +1,96 @@
+
+@model IEnumerable<Staybnb.Models.Booking>
+@using Staybnb.Models
+
+@{
+    ViewData["Title"] = "Guest Check-in";
+
+    var processes =
+        ViewBag.Processes as Dictionary<int, CheckInProcess>
+        ?? new Dictionary<int, CheckInProcess>();
+
+    var existingCheckIns =
+        ViewBag.ExistingCheckIns as Dictionary<int, GuestCheckIn>
+        ?? new Dictionary<int, GuestCheckIn>();
+}
+
+<div class="container py-4">
+    <h1>Guest Check-in</h1>
+    <p class="text-muted">
+        View your approved bookings and complete the host's check-in process.
+    </p>
+
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            You don't have any approved bookings available for check-in yet.
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var booking in Model)
+            {
+                var hasInstructions = processes.ContainsKey(booking.PropertyId);
+                var hasCheckIn = existingCheckIns.TryGetValue(
+                    booking.Id, out var existingCheckIn);
+
+                <div class="col-12 col-md-6">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                @booking.Property.Title
+                            </h5>
+
+                            <p class="text-muted">
+                                @booking.Property.City
+                            </p>
+
+                            <p>
+                                <strong>Check-in date:</strong>
+                                @booking.CheckInDate.ToString("dd MMM yyyy")
+                            </p>
+
+                            <p>
+                                <strong>Check-out date:</strong>
+                                @booking.CheckOutDate.ToString("dd MMM yyyy")
+                            </p>
+
+                            @if (!hasInstructions)
+                            {
+                                <div class="alert alert-warning mb-0">
+                                    The host hasn't configured check-in instructions yet.
+                                </div>
+                            }
+                            else if (hasCheckIn)
+                            {
+                                <a asp-action="Details"
+                                   asp-route-id="@existingCheckIn!.Id"
+                                   class="btn btn-primary">
+                                    Continue Check-in
+                                </a>
+                            }
+                            else
+                            {
+                                <form asp-action="Start" method="post">
+                                    <input type="hidden"
+                                           name="bookingId"
+                                           value="@booking.Id" />
+
+                                    <button type="submit" class="btn btn-primary">
+                                        Start Check-in
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
